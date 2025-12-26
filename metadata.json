@@ -1,0 +1,5 @@
+{
+  "name": "ConcertaAi",
+  "description": "A minimalist, rounded-edge service management app for home and business repairs. It provides role-based access for clients, collaborators, and administrators to manage service requests, quotes, scheduling, and communication.",
+  "requestFramePermissions": []
+}

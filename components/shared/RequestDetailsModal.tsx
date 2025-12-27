@@ -99,6 +99,12 @@ const RequestDetailsModal: React.FC<Props> = ({ requestId, onClose }) => {
                 <div className="flex-grow p-4 sm:p-6 overflow-y-auto overflow-x-hidden scrollbar-hide">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-full">
                         <div className="lg:col-span-7 space-y-6">
+                            <RequestTimeline
+                                createdAt={request.createdAt}
+                                respondedAt={request.respondedAt}
+                                completedAt={request.completedAt}
+                            />
+
                             <InfoSection title="Dados do Serviço">
                                 <div className="flex flex-wrap gap-4 mb-4">
                                     <InfoItem label="Status Atual" value={request.status} badge={true} />
@@ -218,6 +224,36 @@ const InfoSection: React.FC<{ title: string; children: React.ReactNode }> = ({ t
     <div className="bg-surface p-5 sm:p-7 rounded-[2.2rem] border border-secondary/50 shadow-sm">
         <h4 className="font-black text-[9px] sm:text-[10px] mb-5 text-primary/30 uppercase tracking-[0.2em] border-b border-secondary/20 pb-3">{title}</h4>
         <div className="space-y-5">{children}</div>
+    </div>
+);
+
+const RequestTimeline: React.FC<{ createdAt: string, respondedAt?: string, completedAt?: string }> = ({ createdAt, respondedAt, completedAt }) => {
+    const formatDate = (dateStr: string) => {
+        return new Date(dateStr).toLocaleString('pt-BR', {
+            day: '2-digit', month: '2-digit', year: '2-digit',
+            hour: '2-digit', minute: '2-digit'
+        });
+    };
+
+    return (
+        <div className="bg-surface p-6 rounded-[2.2rem] border border-secondary/50 shadow-sm mb-6">
+            <h4 className="font-black text-[9px] text-primary/30 uppercase tracking-[0.2em] mb-4">Linha do Tempo</h4>
+            <div className="space-y-4">
+                <TimelineItem label="Solicitado" date={formatDate(createdAt)} active={true} />
+                {respondedAt && <TimelineItem label="Respondido" date={formatDate(respondedAt)} active={true} color="bg-blue-500" />}
+                {completedAt && <TimelineItem label="Concluído" date={formatDate(completedAt)} active={true} color="bg-green-500" />}
+            </div>
+        </div>
+    );
+};
+
+const TimelineItem: React.FC<{ label: string, date: string, active: boolean, color?: string }> = ({ label, date, active, color = "bg-primary" }) => (
+    <div className="flex items-center gap-4">
+        <div className={`w-2.5 h-2.5 rounded-full ${active ? color : 'bg-secondary'} shrink-0`}></div>
+        <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase text-primary tracking-tighter leading-none">{label}</span>
+            <span className="text-[10px] font-bold text-primary/40 mt-0.5">{date}</span>
+        </div>
     </div>
 );
 

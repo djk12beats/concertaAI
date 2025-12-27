@@ -224,7 +224,8 @@ export const respondToRequest = async (quoteData: Omit<Quote, 'id'>, requestId: 
         .update({
             status: RequestStatus.RESPONDIDO,
             assigned_collaborator_id: collaboratorId,
-            collaborator_name: collaborator?.name || 'Collaborador'
+            collaborator_name: collaborator?.name || 'Collaborador',
+            responded_at: new Date().toISOString()
         })
         .eq('id', requestId);
 
@@ -304,7 +305,10 @@ export const completeService = async (agendaItemId: number): Promise<AgendaItem 
     if (!updated) return undefined;
 
     // Update Request too
-    await supabase.from('service_requests').update({ status: RequestStatus.CONCLUIDO }).eq('id', updated.request_id);
+    await supabase.from('service_requests').update({
+        status: RequestStatus.CONCLUIDO,
+        completed_at: new Date().toISOString()
+    }).eq('id', updated.request_id);
 
     return mapToAgendaItem(updated);
 };
@@ -314,12 +318,18 @@ export const completeService = async (agendaItemId: number): Promise<AgendaItem 
 export const getChatMessages = async (requestId: number): Promise<ChatMessage[]> => {
     const { data, error } = await supabase
         .from('chat_messages')
-        .select('*')
+        .select(`
+            *,
+            profiles!chat_messages_sender_id_fkey (role)
+        `)
         .eq('request_id', requestId)
         .order('created_at', { ascending: true });
 
     if (error) handleSupabaseError(error);
-    return (data || []).map(mapToChatMessage);
+    return (data || []).map(msg => ({
+        ...mapToChatMessage(msg),
+        senderRole: msg.profiles?.role as Role
+    }));
 };
 
 export const sendChatMessage = async (requestId: number, senderId: string, message: string): Promise<ChatMessage> => {
@@ -368,18 +378,27 @@ export const getAdminChatMessages = async (adminId: string, userId: string): Pro
     // Correct Query:
     const { data: d1 } = await supabase
         .from('chat_messages')
-        .select('*')
+        .select(`
+            *,
+            profiles!chat_messages_sender_id_fkey (role)
+        `)
         .eq('sender_id', adminId)
         .eq('recipient_id', userId);
 
     const { data: d2 } = await supabase
         .from('chat_messages')
-        .select('*')
+        .select(`
+            *,
+            profiles!chat_messages_sender_id_fkey (role)
+        `)
         .eq('sender_id', userId)
         .eq('recipient_id', adminId);
 
     const all = [...(d1 || []), ...(d2 || [])].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-    return all.map(mapToChatMessage);
+    return all.map(msg => ({
+        ...mapToChatMessage(msg),
+        senderRole: msg.profiles?.role as Role
+    }));
 };
 
 export const sendAdminChatMessage = async (senderId: string, recipientId: string, message: string): Promise<ChatMessage> => {
@@ -427,6 +446,8 @@ const mapToServiceRequest = (r: any): ServiceRequest => ({
     priority: r.priority as any,
     status: r.status as RequestStatus,
     createdAt: r.created_at,
+    respondedAt: r.responded_at,
+    completedAt: r.completed_at,
     executionDate: r.execution_date,
     photos: r.photos || []
 });

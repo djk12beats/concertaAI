@@ -4,10 +4,15 @@ import { useAuth } from '../../hooks/useAuth';
 import { SettingsIcon } from './Icons';
 import SettingsModal from './SettingsModal';
 import Logo from './Logo';
+import { Role } from '../../types';
 
 const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const displayName = currentUser?.role === Role.ADMIN
+    ? 'Administrador'
+    : currentUser?.name.split(' ')[0];
 
   return (
     <>
@@ -19,7 +24,7 @@ const Header: React.FC = () => {
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
               <span className="hidden sm:block text-sm font-medium opacity-90">
-                Olá, {currentUser?.name.split(' ')[0]}
+                Olá, {displayName}
               </span>
               <button
                 onClick={() => setIsSettingsOpen(true)}

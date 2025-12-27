@@ -34,6 +34,8 @@ export interface ServiceRequest {
   priority: 'Baixa' | 'Média' | 'Alta';
   status: RequestStatus;
   createdAt: string;
+  respondedAt?: string;
+  completedAt?: string;
   executionDate?: string; // Data agendada para execução
   photos: string[];
 }
@@ -64,6 +66,7 @@ export interface ChatMessage {
   requestId: number;
   senderId: string;
   senderName: string;
+  senderRole?: Role;
   message: string;
   createdAt: string;
   recipientId?: string;

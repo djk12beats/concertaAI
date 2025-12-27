@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { ChatMessage } from '../../types';
+import { ChatMessage, Role } from '../../types';
 import { getChatMessages, sendChatMessage } from '../../services/mockApi';
 import { SendIcon } from './Icons';
 
@@ -35,12 +35,13 @@ const Chat: React.FC<Props> = ({ requestId }) => {
     if (newMessage.trim() === '' || !currentUser) return;
 
     const optimisticMessage: ChatMessage = {
-        id: Date.now(),
-        requestId,
-        senderId: currentUser.id,
-        senderName: currentUser.name,
-        message: newMessage,
-        createdAt: new Date().toISOString()
+      id: Date.now(),
+      requestId,
+      senderId: currentUser.id,
+      senderName: currentUser.name,
+      senderRole: currentUser.role,
+      message: newMessage,
+      createdAt: new Date().toISOString()
     };
     setMessages(prev => [...prev, optimisticMessage]);
     setNewMessage('');
@@ -49,7 +50,7 @@ const Chat: React.FC<Props> = ({ requestId }) => {
     const updatedMessages = await getChatMessages(requestId);
     setMessages(updatedMessages);
   };
-  
+
   if (loading) return <div className="flex-grow flex items-center justify-center text-primary/30 font-black uppercase text-[10px] tracking-widest">Carregando chat...</div>
 
   return (
@@ -59,31 +60,29 @@ const Chat: React.FC<Props> = ({ requestId }) => {
       </div>
       <div className="flex-grow p-4 space-y-4 overflow-y-auto scrollbar-hide bg-slate-50/20">
         {messages.length === 0 ? (
-            <div className="h-full flex items-center justify-center">
-                <p className="text-center text-[10px] font-black text-primary/20 uppercase tracking-widest">Inicie a conversa</p>
-            </div>
+          <div className="h-full flex items-center justify-center">
+            <p className="text-center text-[10px] font-black text-primary/20 uppercase tracking-widest">Inicie a conversa</p>
+          </div>
         ) : (
-            messages.map((msg) => (
+          messages.map((msg) => (
             <div
-                key={msg.id}
-                className={`flex flex-col ${
-                msg.senderId === currentUser?.id ? 'items-end' : 'items-start'
+              key={msg.id}
+              className={`flex flex-col ${msg.senderId === currentUser?.id ? 'items-end' : 'items-start'
                 }`}
             >
-                <div
-                className={`max-w-[85%] sm:max-w-[75%] px-4 py-3 rounded-2xl shadow-sm ${
-                    msg.senderId === currentUser?.id
-                    ? 'bg-primary text-white'
-                    : 'bg-white text-primary border border-secondary'
-                }`}
-                >
+              <div
+                className={`max-w-[85%] sm:max-w-[75%] px-4 py-3 rounded-2xl shadow-sm ${msg.senderId === currentUser?.id
+                  ? 'bg-primary text-white'
+                  : 'bg-white text-primary border border-secondary'
+                  }`}
+              >
                 <p className="text-sm font-medium leading-relaxed">{msg.message}</p>
-                </div>
-                <span className="text-[9px] font-black text-primary/30 mt-1 uppercase tracking-tighter">
-                {msg.senderName.split(' ')[0]} • {new Date(msg.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                </span>
+              </div>
+              <span className="text-[9px] font-black text-primary/30 mt-1 uppercase tracking-tighter">
+                {msg.senderRole === Role.ADMIN ? 'ADMIN' : msg.senderName.split(' ')[0]} • {new Date(msg.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              </span>
             </div>
-            ))
+          ))
         )}
         <div ref={messagesEndRef} />
       </div>

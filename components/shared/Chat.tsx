@@ -55,10 +55,10 @@ const Chat: React.FC<Props> = ({ requestId }) => {
 
   return (
     <div className="bg-surface border border-secondary/50 rounded-[2rem] flex flex-col h-full shadow-inner overflow-hidden">
-      <div className="p-3 border-b border-secondary/30 bg-slate-50/50">
-        <h4 className="font-black text-[9px] text-primary/30 uppercase tracking-[0.2em] text-center">Canal de Comunicação</h4>
+      <div className="p-2 border-b border-secondary/30 bg-slate-50/50">
+        <h4 className="font-black text-[9px] text-primary/30 uppercase tracking-[0.2em] text-center">Chat</h4>
       </div>
-      <div className="flex-grow p-4 space-y-4 overflow-y-auto scrollbar-hide bg-slate-50/20">
+      <div className="flex-grow p-3 space-y-3 overflow-y-auto scrollbar-hide bg-slate-50/20">
         {messages.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <p className="text-center text-[10px] font-black text-primary/20 uppercase tracking-widest">Inicie a conversa</p>
@@ -71,14 +71,14 @@ const Chat: React.FC<Props> = ({ requestId }) => {
                 }`}
             >
               <div
-                className={`max-w-[85%] sm:max-w-[75%] px-4 py-3 rounded-2xl shadow-sm ${msg.senderId === currentUser?.id
+                className={`max-w-[90%] sm:max-w-[80%] px-3 py-2 rounded-xl shadow-sm ${msg.senderId === currentUser?.id
                   ? 'bg-primary text-white'
                   : 'bg-white text-primary border border-secondary'
                   }`}
               >
-                <p className="text-sm font-medium leading-relaxed">{msg.message}</p>
+                <p className="text-sm leading-tight">{msg.message}</p>
               </div>
-              <span className="text-[9px] font-black text-primary/30 mt-1 uppercase tracking-tighter">
+              <span className="text-[8px] font-black text-primary/30 mt-0.5 uppercase tracking-tighter">
                 {msg.senderRole === Role.ADMIN ? 'ADMIN' : msg.senderName.split(' ')[0]} • {new Date(msg.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
@@ -86,18 +86,18 @@ const Chat: React.FC<Props> = ({ requestId }) => {
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="p-3 border-t border-secondary/30 bg-white">
+      <div className="p-2 border-t border-secondary/30 bg-white">
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Mensagem..."
-            className="flex-grow p-3 bg-secondary/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 border-transparent text-sm font-medium"
+            className="flex-grow p-2.5 bg-secondary/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 border-transparent text-sm font-medium"
           />
           <button
             type="submit"
-            className="p-3 bg-primary text-white rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 shadow-lg"
+            className="p-2.5 bg-primary text-white rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-30 shadow-lg"
             disabled={!newMessage.trim()}
           >
             <SendIcon />

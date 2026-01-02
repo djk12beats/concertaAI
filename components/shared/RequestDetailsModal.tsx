@@ -37,7 +37,16 @@ const RequestDetailsModal: React.FC<Props> = ({ requestId, onClose }) => {
     const handleDownload = (photoUrl: string, index: number) => {
         const link = document.createElement('a');
         link.href = photoUrl;
-        link.download = `concerta-ai-request-${requestId}-photo-${index + 1}.png`;
+
+        let extension = 'png';
+        if (photoUrl.startsWith('data:')) {
+            const mime = photoUrl.split(';')[0].split(':')[1];
+            extension = mime.split('/')[1];
+            // Fix problematic extensions if necessary (e.g., jpeg -> jpg)
+            if (extension === 'jpeg') extension = 'jpg';
+        }
+
+        link.download = `concerta-ai-request-${requestId}-attachment-${index + 1}.${extension}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -122,17 +131,24 @@ const RequestDetailsModal: React.FC<Props> = ({ requestId, onClose }) => {
                             {request.photos && request.photos.length > 0 && (
                                 <InfoSection title="Evidências e Fotos">
                                     <div className="grid grid-cols-2 xs:grid-cols-3 gap-3">
-                                        {request.photos.map((photo, index) => (
-                                            <div key={index} className="group relative rounded-2xl overflow-hidden border-2 border-secondary bg-slate-100 aspect-square">
-                                                <img src={photo} alt={`foto ${index + 1}`} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                                                <button
-                                                    onClick={() => handleDownload(photo, index)}
-                                                    className="absolute bottom-2 right-2 p-2 bg-white/90 text-primary rounded-lg shadow-lg active:scale-90 transition-transform"
-                                                >
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                                </button>
-                                            </div>
-                                        ))}
+                                        {request.photos.map((photo, index) => {
+                                            const isVideo = photo.startsWith('data:video/');
+                                            return (
+                                                <div key={index} className="group relative rounded-2xl overflow-hidden border-2 border-secondary bg-slate-100 aspect-square">
+                                                    {isVideo ? (
+                                                        <video src={photo} className="w-full h-full object-cover" controls />
+                                                    ) : (
+                                                        <img src={photo} alt={`foto ${index + 1}`} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                                    )}
+                                                    <button
+                                                        onClick={() => handleDownload(photo, index)}
+                                                        className="absolute bottom-2 right-2 p-2 bg-white/90 text-primary rounded-lg shadow-lg active:scale-90 transition-transform z-10"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </InfoSection>
                             )}

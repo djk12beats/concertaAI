@@ -19,18 +19,18 @@ const NewRequestForm: React.FC<Props> = ({ onClose, onSuccess }) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const filesArray = Array.from(e.target.files);
+      const filesArray: File[] = Array.from(e.target.files);
       if (filesArray.length > 5) {
         setError("Você pode enviar no máximo 5 imagens.");
         return;
       }
       for (const file of filesArray) {
-        if (!['image/jpeg', 'image/png'].includes((file as File).type)) {
-          setError('Apenas arquivos JPG e PNG são permitidos.');
+        if (!['image/jpeg', 'image/png', 'video/mp4', 'video/webm', 'video/ogg'].includes((file as File).type)) {
+          setError('Apenas arquivos JPG, PNG, MP4, WEBM e OGG são permitidos.');
           return;
         }
-        if ((file as File).size > 5 * 1024 * 1024) { // 5MB
-          setError('Cada arquivo deve ter no máximo 5MB.');
+        if ((file as File).size > 50 * 1024 * 1024) { // 50MB
+          setError('Cada arquivo deve ter no máximo 50MB.');
           return;
         }
       }
@@ -130,7 +130,7 @@ const NewRequestForm: React.FC<Props> = ({ onClose, onSuccess }) => {
 
             <div>
               <label className="block text-[10px] font-black text-primary/30 uppercase tracking-widest mb-1.5">
-                Fotos (máx 5)
+                Anexos (Fotos/Vídeos - máx 5)
               </label>
               <div className="mt-1 flex items-center justify-center w-full">
                 <label className="flex flex-col items-center justify-center w-full h-20 sm:h-24 border-2 border-secondary border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors">
@@ -143,7 +143,7 @@ const NewRequestForm: React.FC<Props> = ({ onClose, onSuccess }) => {
                   <input
                     type="file"
                     multiple
-                    accept="image/png, image/jpeg"
+                    accept="image/png, image/jpeg, video/mp4, video/webm, video/ogg"
                     onChange={handleFileChange}
                     className="hidden"
                   />
@@ -154,18 +154,25 @@ const NewRequestForm: React.FC<Props> = ({ onClose, onSuccess }) => {
 
           {previews.length > 0 && (
             <div className="grid grid-cols-5 gap-2">
-              {previews.map((src, idx) => (
-                <div key={idx} className="relative group rounded-lg overflow-hidden border-2 border-secondary bg-slate-100 aspect-square">
-                  <img src={src} alt={`preview ${idx + 1}`} className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removePhoto(idx)}
-                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
-                </div>
-              ))}
+              {previews.map((src, idx) => {
+                const isVideo = photos[idx]?.type.startsWith('video/');
+                return (
+                  <div key={idx} className="relative group rounded-lg overflow-hidden border-2 border-secondary bg-slate-100 aspect-square">
+                    {isVideo ? (
+                      <video src={src} className="w-full h-full object-cover" controls />
+                    ) : (
+                      <img src={src} alt={`preview ${idx + 1}`} className="w-full h-full object-cover" />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(idx)}
+                      className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
 
